@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="wizards">
+    <output-path>$PROJECT_DIR$/out/artifacts/wizards</output-path>
+    <root id="archive" name="wizards.jar">
+      <element id="dir-copy" path="$PROJECT_DIR$/src" />
+      <element id="module-output" name="WizardsForVaadin7" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/WebContent/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>

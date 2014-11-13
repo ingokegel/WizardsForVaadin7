@@ -197,9 +197,7 @@ public class Wizard extends CustomComponent implements
         verticalProgressbarWrapper.setSizeFull();
 
         setSizeFull();
-
-        contentPanel = new Panel();
-        contentPanel.setSizeFull();
+        createPanel();
 
         initControlButtons();
         initFooter();
@@ -215,6 +213,12 @@ public class Wizard extends CustomComponent implements
 
     }
 
+    private void createPanel() {
+        contentPanel = new Panel();
+        contentPanel.addStyleName("wizard-panel");
+        contentPanel.setSizeFull();
+    }
+
     private void initHorizontal() {
 
         mainLayout = new VerticalLayout();
@@ -223,8 +227,7 @@ public class Wizard extends CustomComponent implements
 
         setSizeFull();
 
-        contentPanel = new Panel();
-        contentPanel.setSizeFull();
+        createPanel();
         contentPanel.setContent(new VerticalLayout()); // might not be needed
 
         initControlButtons();
@@ -241,6 +244,7 @@ public class Wizard extends CustomComponent implements
 
     private void initFooter() {
         footer = new HorizontalLayout();
+        footer.addStyleName("wizard-footer");
         footer.setSpacing(true);
         footer.addComponent(cancelButton);
         footer.addComponent(backButton);
