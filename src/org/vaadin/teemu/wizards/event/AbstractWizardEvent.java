@@ -1,10 +1,8 @@
 package org.vaadin.teemu.wizards.event;
 
+import com.vaadin.ui.Component;
 import org.vaadin.teemu.wizards.Wizard;
 
-import com.vaadin.ui.Component;
-
-@SuppressWarnings("serial")
 public class AbstractWizardEvent extends Component.Event {
 
     protected AbstractWizardEvent(Wizard source) {

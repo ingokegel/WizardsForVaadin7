@@ -4,3 +4,7 @@
 .settings
 build
 WebContent/VAADIN/widgetsets
+.idea/workspace.xml
+.idea/dictionaries
+.gradle
+out

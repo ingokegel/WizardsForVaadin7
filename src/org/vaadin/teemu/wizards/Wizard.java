@@ -1,30 +1,10 @@
 package org.vaadin.teemu.wizards;
 
+import com.vaadin.ui.*;
+import org.vaadin.teemu.wizards.event.*;
+
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
-import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
-import org.vaadin.teemu.wizards.event.WizardProgressListener;
-import org.vaadin.teemu.wizards.event.WizardStepActivationEvent;
-import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
-
-import com.vaadin.server.Page;
-import com.vaadin.server.Page.UriFragmentChangedEvent;
-import com.vaadin.server.Page.UriFragmentChangedListener;
-import com.vaadin.ui.AbstractOrderedLayout;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.VerticalLayout;
+import java.util.*;
 
 /**
  * Component for displaying multi-step wizard style user interface.
@@ -36,27 +16,16 @@ import com.vaadin.ui.VerticalLayout;
  * </p>
  * 
  * <p>
- * The wizard also supports navigation through URI fragments. This feature is
- * disabled by default, but you can enable it using
- * {@link #setUriFragmentEnabled(boolean)} method. Each step will get a
- * generated identifier that is used as the URI fragment. If you wish to
- * override these with your own identifiers, you can add the steps using the
- * overloaded {@link #addStep(WizardStep, String)} method.
- * </p>
- * 
- * <p>
  * To react on the progress, cancellation or completion of this {@code Wizard}
  * you should add one or more listeners that implement the
  * {@link WizardProgressListener} interface. These listeners are added using the
- * {@link #addListener(WizardProgressListener)} method and removed with the
- * {@link #removeListener(WizardProgressListener)}.
+ * {@link #addListener(WizardProgressListener)} method.
  * </p>
  * 
  * @author Teemu Pöntelin / Vaadin Ltd
  */
-@SuppressWarnings("serial")
-public class Wizard extends CustomComponent implements
-        UriFragmentChangedListener {
+@SuppressWarnings({"serial", "unused"})
+public class Wizard extends CustomComponent {
 
     /**
      * NONE = do not show any links </br> PREVIOUS = only show completed steps
@@ -65,14 +34,14 @@ public class Wizard extends CustomComponent implements
      * @author johan
      * 
      */
-    public static enum LinkMode {
+    public enum LinkMode {
         NONE, PREVIOUS, ALL
-    };
+    }
 
     protected LinkMode currentLinkmode = LinkMode.NONE;
 
-    protected final List<WizardStep> steps = new ArrayList<WizardStep>();
-    protected final Map<String, WizardStep> idMap = new HashMap<String, WizardStep>();
+    protected final List<WizardStep> steps = new ArrayList<>();
+    protected final Map<String, WizardStep> idMap = new HashMap<>();
 
     protected WizardStep currentStep;
     protected WizardStep lastCompletedStep;
@@ -101,26 +70,15 @@ public class Wizard extends CustomComponent implements
 
     private boolean showProgressIndicator;
 
-    private boolean uriFragmentEnabled = false;
-
     static {
         try {
-            WIZARD_COMPLETED_METHOD = WizardProgressListener.class
-                    .getDeclaredMethod("wizardCompleted",
-                            new Class[] { WizardCompletedEvent.class });
-            WIZARD_STEP_SET_CHANGED_METHOD = WizardProgressListener.class
-                    .getDeclaredMethod("stepSetChanged",
-                            new Class[] { WizardStepSetChangedEvent.class });
-            WIZARD_ACTIVE_STEP_CHANGED_METHOD = WizardProgressListener.class
-                    .getDeclaredMethod("activeStepChanged",
-                            new Class[] { WizardStepActivationEvent.class });
-            WIZARD_CANCELLED_METHOD = WizardProgressListener.class
-                    .getDeclaredMethod("wizardCancelled",
-                            new Class[] { WizardCancelledEvent.class });
-        } catch (final java.lang.NoSuchMethodException e) {
+            WIZARD_COMPLETED_METHOD = WizardProgressListener.class.getDeclaredMethod("wizardCompleted", WizardCompletedEvent.class);
+            WIZARD_STEP_SET_CHANGED_METHOD = WizardProgressListener.class.getDeclaredMethod("stepSetChanged", WizardStepSetChangedEvent.class);
+            WIZARD_ACTIVE_STEP_CHANGED_METHOD = WizardProgressListener.class.getDeclaredMethod("activeStepChanged", WizardStepActivationEvent.class);
+            WIZARD_CANCELLED_METHOD = WizardProgressListener.class.getDeclaredMethod("wizardCancelled", WizardCancelledEvent.class);
+        } catch (NoSuchMethodException e) {
             // This should never happen
-            throw new java.lang.RuntimeException(
-                    "Internal error finding methods in Wizard", e);
+            throw new java.lang.RuntimeException("Internal error finding methods in Wizard", e);
         }
     }
 
@@ -146,7 +104,6 @@ public class Wizard extends CustomComponent implements
      * distributed. If progress bar is shown horizontally, also the indicator
      * will be shown, otherwise not
      * 
-     * @param allow
      */
     public Wizard(boolean horizontalWizardProgressBar,
             boolean hasVerticalStepSpacing) {
@@ -164,9 +121,6 @@ public class Wizard extends CustomComponent implements
      * distributed. If showProgressIndicator is set to false, the progress
      * indicator bar will not be shown.
      * 
-     * @param horizontalWizardProgressBar
-     * @param hasVerticalStepSpacing
-     * @param showProgressIndicator
      */
     public Wizard(boolean horizontalWizardProgressBar,
             boolean hasVerticalStepSpacing, boolean showProgressIndicator) {
@@ -189,8 +143,9 @@ public class Wizard extends CustomComponent implements
     }
 
     private void initVertical() {
-        mainLayout = new VerticalLayout();
+        mainLayout = createCompactLayout();
         verticalProgressbarWrapper = new HorizontalLayout();
+        verticalProgressbarWrapper.setSpacing(false);
 
         setCompositionRoot(mainLayout);
 
@@ -213,6 +168,13 @@ public class Wizard extends CustomComponent implements
 
     }
 
+    private VerticalLayout createCompactLayout() {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(false);
+        layout.setSpacing(false);
+        return layout;
+    }
+
     private void createPanel() {
         contentPanel = new Panel();
         contentPanel.addStyleName("wizard-panel");
@@ -221,14 +183,14 @@ public class Wizard extends CustomComponent implements
 
     private void initHorizontal() {
 
-        mainLayout = new VerticalLayout();
+        mainLayout = createCompactLayout();
 
         setCompositionRoot(mainLayout);
 
         setSizeFull();
 
         createPanel();
-        contentPanel.setContent(new VerticalLayout()); // might not be needed
+        contentPanel.setContent(createCompactLayout()); // might not be needed
 
         initControlButtons();
         initFooter();
@@ -245,7 +207,6 @@ public class Wizard extends CustomComponent implements
     private void initFooter() {
         footer = new HorizontalLayout();
         footer.addStyleName("wizard-footer");
-        footer.setSpacing(true);
         footer.addComponent(cancelButton);
         footer.addComponent(backButton);
         footer.addComponent(nextButton);
@@ -254,33 +215,17 @@ public class Wizard extends CustomComponent implements
 
     private void initControlButtons() {
         nextButton = new Button("Next");
-        nextButton.addClickListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                next();
-            }
-        });
+        nextButton.addClickListener((Button.ClickListener) event -> next());
 
         backButton = new Button("Back");
-        backButton.addClickListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                back();
-            }
-        });
+        backButton.addClickListener((Button.ClickListener) event -> back());
 
         finishButton = new Button("Finish");
-        finishButton.addClickListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                finish();
-            }
-        });
+        finishButton.addClickListener((Button.ClickListener) event -> finish());
         finishButton.setEnabled(currentLinkmode == LinkMode.ALL);
 
         cancelButton = new Button("Cancel");
-        cancelButton.addClickListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                cancel();
-            }
-        });
+        cancelButton.addClickListener((Button.ClickListener) event -> cancel());
     }
 
     private void initDefaultProgressBar() {
@@ -288,26 +233,6 @@ public class Wizard extends CustomComponent implements
                 isHorizontalWizardProgressBar, showProgressIndicator);
         addListener(progressBar);
         setProgressBar(progressBar);
-    }
-
-    public void setUriFragmentEnabled(boolean enabled) {
-
-        if (uriFragmentEnabled == enabled) {
-            return;
-        }
-
-        // at this point enabled != uriFragmentEnabled
-        if (enabled) {
-            Page.getCurrent().addUriFragmentChangedListener(this);
-        } else {
-            Page.getCurrent().removeUriFragmentChangedListener(this);
-        }
-
-        uriFragmentEnabled = enabled;
-    }
-
-    public boolean isUriFragmentEnabled() {
-        return uriFragmentEnabled;
     }
 
     protected AbstractOrderedLayout getProgressBarWrapperLayout() {
@@ -364,8 +289,6 @@ public class Wizard extends CustomComponent implements
      * don't wish to explicitly provide an identifier, you can use the
      * {@link #addStep(WizardStep)} method.
      * 
-     * @param step
-     * @param id
      * @throws IllegalStateException
      *             if the given {@code id} already exists.
      */
@@ -414,33 +337,16 @@ public class Wizard extends CustomComponent implements
      * automatically. If you wish to provide an explicit identifier for your
      * WizardStep, you can use the {@link #addStep(WizardStep, String)} method
      * instead.
-     * 
-     * @param step
      */
     public void addStep(WizardStep step) {
         addStep(step, "wizard-step-" + stepIndex++);
     }
 
     public void addListener(WizardProgressListener listener) {
-        addListener(WizardCompletedEvent.class, listener,
-                WIZARD_COMPLETED_METHOD);
-        addListener(WizardStepActivationEvent.class, listener,
-                WIZARD_ACTIVE_STEP_CHANGED_METHOD);
-        addListener(WizardStepSetChangedEvent.class, listener,
-                WIZARD_STEP_SET_CHANGED_METHOD);
-        addListener(WizardCancelledEvent.class, listener,
-                WIZARD_CANCELLED_METHOD);
-    }
-
-    public void removeListener(WizardProgressListener listener) {
-        removeListener(WizardCompletedEvent.class, listener,
-                WIZARD_COMPLETED_METHOD);
-        removeListener(WizardStepActivationEvent.class, listener,
-                WIZARD_ACTIVE_STEP_CHANGED_METHOD);
-        removeListener(WizardStepSetChangedEvent.class, listener,
-                WIZARD_STEP_SET_CHANGED_METHOD);
-        removeListener(WizardCancelledEvent.class, listener,
-                WIZARD_CANCELLED_METHOD);
+        addListener(WizardCompletedEvent.class, listener, WIZARD_COMPLETED_METHOD);
+        addListener(WizardStepActivationEvent.class, listener, WIZARD_ACTIVE_STEP_CHANGED_METHOD);
+        addListener(WizardStepSetChangedEvent.class, listener, WIZARD_STEP_SET_CHANGED_METHOD);
+        addListener(WizardCancelledEvent.class, listener, WIZARD_CANCELLED_METHOD);
     }
 
     public List<WizardStep> getSteps() {
@@ -471,10 +377,10 @@ public class Wizard extends CustomComponent implements
 
     private void updateButtons() {
         if (isLastStep(currentStep)) {
-            finishButton.setEnabled(true || currentLinkmode == LinkMode.ALL);
+            finishButton.setEnabled(true);
             nextButton.setEnabled(false);
         } else {
-            finishButton.setEnabled(false || currentLinkmode == LinkMode.ALL);
+            finishButton.setEnabled(currentLinkmode == LinkMode.ALL);
             nextButton.setEnabled(true);
         }
         backButton.setEnabled(!isFirstStep(currentStep));
@@ -518,18 +424,14 @@ public class Wizard extends CustomComponent implements
             if (advancing) {
                 WizardStep curr = steps.get(steps.indexOf(step) - 1); // "current"
                                                                       // step
-                if (!curr.onAdvance()) {
-                    // not allowed to advance
-                    return false;
-                }
+                // not allowed to advance
+                return curr.onAdvance();
             } else {
                 WizardStep curr = steps.get(steps.indexOf(step) + 1); // "current"
                                                                       // step
-                if (!curr.onBack()) {
-                    // uriFragment.setF
-                    // not allowed to go back
-                    return false;
-                }
+                // uriFragment.setF
+                // not allowed to go back
+                return curr.onBack();
             }
         }
 
@@ -540,7 +442,6 @@ public class Wizard extends CustomComponent implements
      * At this point, no check will be made. The step will be activated. Call
      * checkCanStepBeActivated first
      * 
-     * @param step
      */
     protected void activateStep(WizardStep step) {
 
@@ -557,7 +458,6 @@ public class Wizard extends CustomComponent implements
         contentPanel.setContent(step.getContent());
         currentStep = step;
 
-        updateUriFragment();
         updateButtons();
         step.onActivate(); // Extra feature
         fireEvent(new WizardStepActivationEvent(this, step));
@@ -566,9 +466,6 @@ public class Wizard extends CustomComponent implements
     protected void tryToActivateStep(String id) {
         WizardStep stepToActivate = idMap.get(id);
         if (stepToActivate != null) {
-            // check that we don't go past the lastCompletedStep by using the id
-            int lastCompletedIndex = lastCompletedStep == null ? -1 : steps
-                    .indexOf(lastCompletedStep);
             int stepToActivateIndex = steps.indexOf(stepToActivate);
             int currIndex = steps.indexOf(currentStep);
 
@@ -627,17 +524,6 @@ public class Wizard extends CustomComponent implements
             }
         }
         return null;
-    }
-
-    private void updateUriFragment() {
-        if (isUriFragmentEnabled()) {
-            String currentStepId = getId(currentStep);
-            if (currentStepId != null && currentStepId.length() > 0) {
-                Page.getCurrent().setUriFragment(currentStepId, false);
-            } else {
-                Page.getCurrent().setUriFragment(null, false);
-            }
-        }
     }
 
     protected boolean isFirstStep(WizardStep step) {
@@ -724,17 +610,6 @@ public class Wizard extends CustomComponent implements
         }
     }
 
-    public void uriFragmentChanged(UriFragmentChangedEvent event) {
-        if (isUriFragmentEnabled()) {
-            String fragment = event.getUriFragment();
-            if (fragment == null || fragment.equals("") && !steps.isEmpty()) {
-                // empty fragment -> set the fragment of first step
-                Page.getCurrent().setUriFragment(getId(steps.get(0)));
-            } else {
-                tryToActivateStep(fragment);
-            }
-        }
-    }
 
     /**
      * Removes the given step from this Wizard. An {@link IllegalStateException}
@@ -799,7 +674,6 @@ public class Wizard extends CustomComponent implements
      * LinkMode.PREVIOUS only shows steps prior to the current step as links and
      * LinkMode.ALL always shows the steps as links.
      * 
-     * @param linkMode
      */
     public void setLinkMode(LinkMode linkMode) {
         currentLinkmode = linkMode;
@@ -814,7 +688,6 @@ public class Wizard extends CustomComponent implements
      * out. Needs the steps to be vertically laid out, otherwise this will have
      * no effect.
      * 
-     * @param pixels
      */
     public void setProgressBarWidth(int pixels) {
         ((WizardProgressBar) progressBar).setPixelWidth(pixels);

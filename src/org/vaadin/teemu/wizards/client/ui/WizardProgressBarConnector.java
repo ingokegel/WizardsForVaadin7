@@ -1,7 +1,5 @@
 package org.vaadin.teemu.wizards.client.ui;
 
-import org.vaadin.teemu.wizards.WizardProgressBar;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.communication.RpcProxy;
@@ -9,6 +7,7 @@ import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractComponentConnector;
 import com.vaadin.client.ui.SimpleManagedLayout;
 import com.vaadin.shared.ui.Connect;
+import org.vaadin.teemu.wizards.WizardProgressBar;
 
 @Connect(value = WizardProgressBar.class)
 public class WizardProgressBarConnector extends AbstractComponentConnector
@@ -21,15 +20,8 @@ public class WizardProgressBarConnector extends AbstractComponentConnector
         System.out.println("connector initialized for Wizard");
 
         getWidget().setProgressBarItemClickHandler(
-                new ProgressBarItemClickHandler() {
-
-                    @Override
-                    public void onProgressBarItemClicked(String id) {
-                        getRpcProxy(WizardProgressBarServerRpc.class)
-                                .progressBarItemClicked(id);
-
-                    }
-                });
+                id -> getRpcProxy(WizardProgressBarServerRpc.class)
+                        .progressBarItemClicked(id));
     }
 
     @Override

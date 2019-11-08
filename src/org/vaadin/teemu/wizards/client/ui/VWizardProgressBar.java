@@ -1,19 +1,14 @@
 package org.vaadin.teemu.wizards.client.ui;
 
-import java.util.ArrayList;
-
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.CellPanel;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.vaadin.client.ApplicationConnection;
+
+import java.util.ArrayList;
 
 public class VWizardProgressBar extends FlowPanel implements
         HasProgressBarItemClickHandler {
@@ -151,10 +146,10 @@ public class VWizardProgressBar extends FlowPanel implements
                     if (_hasVerticalSpacing) {
                         barElement.getStyle().setHeight(
                                 (i + 1) * stepHeight - stepHeight
-                                        + captionHeight / 2, Unit.PX);
+                                        + captionHeight / 2f, Unit.PX);
                     } else {
                         barElement.getStyle().setHeight(
-                                totalHeight - captionHeight / 2, Unit.PX);
+                                totalHeight - captionHeight / 2f, Unit.PX);
                     }
                 }
             }
@@ -189,6 +184,7 @@ public class VWizardProgressBar extends FlowPanel implements
         if (linkmode.equals("previous") && !isCurrentStep && isCompletedStep) {
             return true;
         }
+        //noinspection RedundantIfStatement
         if (linkmode.equals("all") && !isCurrentStep) {
             return true;
         }
@@ -243,18 +239,13 @@ public class VWizardProgressBar extends FlowPanel implements
             captionElement = Document.get().createDivElement();
             root.appendChild(captionElement);
 
-            addDomHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-
-                    if (asLink) {
-                        handler.onProgressBarItemClicked(ProgressBarItem.this.stepId);
-                    } else {
-                        System.out.println("Clicked, but not as a link");
-                    }
-
+            addDomHandler(event -> {
+                if (asLink) {
+                    handler.onProgressBarItemClicked(ProgressBarItem.this.stepId);
+                } else {
+                    System.out.println("Clicked, but not as a link");
                 }
+
             }, ClickEvent.getType());
         }
 
